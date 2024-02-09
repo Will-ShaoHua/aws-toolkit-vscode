@@ -143,6 +143,7 @@ export class DefaultCodeWhispererClient {
         const bearerToken = await AuthUtil.instance.getBearerToken()
         session.setSdkApiCallStart()
         const cwsprConfig = getCodewhispererConfig()
+        getLogger().debug('codewhisperer: createUserSdkClient: before createAwsService')
         return (await globals.sdkClientBuilder.createAwsService(
             Service,
             {
@@ -180,6 +181,9 @@ export class DefaultCodeWhispererClient {
 
     public async listRecommendations(request: ListRecommendationsRequest): Promise<ListRecommendationsResponse> {
         if (this.isBearerTokenAuth()) {
+            getLogger().debug(
+                'codewhisperer: listRecommendations: isBearerTokenFlow, will invoke generateCompletion API'
+            )
             return await (await this.createUserSdkClient()).generateCompletions(request).promise()
         }
         return (await this.createSdkClient()).listRecommendations(request).promise()

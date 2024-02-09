@@ -10,6 +10,7 @@ import { AwsContext } from './awsContext'
 import { DevSettings } from './settings'
 import { getUserAgent } from './telemetry/util'
 import { telemetry } from './telemetry/telemetry'
+import { getLogger } from './logger/logger'
 
 // These are not on the public API but are very useful for logging purposes.
 // Tests guard against the possibility that these values change unexpectedly.
@@ -72,6 +73,7 @@ export class DefaultAWSClientBuilder implements AWSClientBuilder {
         userAgent: boolean = true,
         settings = DevSettings.instance
     ): Promise<T> {
+        getLogger().debug('codewhisperer: createAwsService: start createAwsService')
         const onRequest = options?.onRequestSetup ?? []
         const listeners = Array.isArray(onRequest) ? onRequest : [onRequest]
         const opt = { ...options }
@@ -84,6 +86,7 @@ export class DefaultAWSClientBuilder implements AWSClientBuilder {
                 throw new Error('Toolkit is not logged-in.')
             }
 
+            getLogger().debug('codewhisperer: createAwsService: starting fetching credential')
             opt.credentials = new (class extends Credentials {
                 public constructor() {
                     // The class doesn't like being instantiated with empty creds
@@ -120,31 +123,41 @@ export class DefaultAWSClientBuilder implements AWSClientBuilder {
                     this.expireTime = creds.expiration ?? this.expireTime
                 }
             })()
+
+            getLogger().debug('codewhisperer: createAwsService: finish fetching credential')
         }
 
         if (!opt.region && region) {
+            getLogger().debug('codewhisperer: createAwsService: set region')
             opt.region = region
         }
 
         if (userAgent && !opt.customUserAgent) {
+            getLogger().debug('codewhisperer: createAwsService: set userAgent')
             opt.customUserAgent = await getUserAgent({ includePlatform: true, includeClientId: true })
         }
 
+        getLogger().debug('codewhisperer: createAwsService: set apiConfig')
         const apiConfig = (opt as { apiConfig?: { metadata?: Record<string, string> } } | undefined)?.apiConfig
         const serviceName =
             apiConfig?.metadata?.serviceId?.toLowerCase() ??
             (type as unknown as { serviceIdentifier?: string }).serviceIdentifier
 
         if (serviceName) {
+            getLogger().debug('codewhisperer: createAwsService: set endpoint')
             opt.endpoint = settings.get('endpoints', {})[serviceName] ?? opt.endpoint
         }
 
+        getLogger().debug('codewhisperer: createAwsService: initialize service')
         const service = new type(opt)
+
+        getLogger().debug('codewhisperer: createAwsService: binding requestListeners')
         const originalSetup = service.setupRequestListeners.bind(service)
 
         // Record request IDs to the current context, potentially overriding the field if
         // multiple API calls are made in the same context. We only do failures as successes
         // are generally uninteresting and noisy.
+        getLogger().debug('codewhisperer: createAwsService: pushing listeners')
         listeners.push(request => {
             request.on('error', err => {
                 if (!err.retryable) {
@@ -163,11 +176,13 @@ export class DefaultAWSClientBuilder implements AWSClientBuilder {
             })
         })
 
+        getLogger().debug('codewhisperer: createAwsService: set up requestListener')
         service.setupRequestListeners = (request: Request<any, AWSError>) => {
             originalSetup(request)
             listeners.forEach(l => l(request as AWS.Request<any, AWSError> & RequestExtras))
         }
 
+        getLogger().debug('codewhisperer: createAwsService: finish createAwsService')
         return service
     }
 }
