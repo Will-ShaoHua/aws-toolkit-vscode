@@ -94,12 +94,11 @@ export class LspClient {
     // todo: maynot need language? or it should send language[] instead
     // v2
     async indexFilesV2(paths: string[], rootPath: string) {
-        const language = vscode.window.activeTextEditor?.document.languageId ?? 'plaintext'
         const payload: BuildIndexRequestPayload = {
             filePaths: paths,
             projectRoot: rootPath,
             config: 'all',
-            language: language,
+            language: '',
         }
         try {
             const encryptedRequest = await this.encrypt(JSON.stringify(payload))
@@ -186,7 +185,7 @@ export class LspClient {
 
     // not yet account for file move
     // v2
-    async updateIndexV2(filePath: string[], mode: 'update' | 'remove' | 'add' | 'rename') {
+    async updateIndexV2(filePath: string[], mode: 'update' | 'remove' | 'add') {
         const payload: UpdateIndexV2RequestPayload = {
             filePaths: filePath,
             updateMode: mode,

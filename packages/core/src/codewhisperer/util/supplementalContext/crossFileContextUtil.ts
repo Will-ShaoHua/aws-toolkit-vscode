@@ -102,6 +102,8 @@ export async function fetchSupplementalContextForSrc(
         new vscode.Range(startLine, 0, endLine, editor.document.lineAt(endLine).text.length)
     )
     await LspClient.instance.queryV2('The intersection of graph survey and trees', 'bm25')
+    const r = await LspClient.instance.queryV2(editor.document.uri.fsPath, 'codemap')
+    getLogger().info(r)
     // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     const bestChunks: Chunk[] = findBestKChunkMatches(inputChunk, chunkList, crossFileContextConfig.topK)
     throwIfCancelled(cancellationToken)
