@@ -102,10 +102,10 @@ export async function fetchSupplementalContextForSrc(
         new vscode.Range(startLine, 0, endLine, editor.document.lineAt(endLine).text.length)
     )
 
-    const e = await LspClient.instance.queryV2(editor.document.uri.fsPath, 'codemap')
     const f = await LspClient.instance.queryBM25(inputChunkContent, editor.document.uri.fsPath)
-    console.log(e)
     console.log(f)
+    const r = await LspClient.instance.queryV2(editor.document.uri.fsPath, 'codemap')
+    getLogger().info(r)
     // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     const bestChunks: Chunk[] = findBestKChunkMatches(inputChunk, chunkList, crossFileContextConfig.topK)
     throwIfCancelled(cancellationToken)

@@ -349,7 +349,7 @@ export class LspController {
                 })
             }
         } catch (e) {
-            getLogger().error(`LspController: Failed to build vector index of project`)
+            getLogger().error(`LspController: Failed to build vector index of project ${e}`)
             telemetry.amazonq_indexWorkspace.emit({
                 duration: performance.now() - start,
                 result: 'Failed',
