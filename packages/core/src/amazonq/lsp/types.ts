@@ -57,7 +57,10 @@ export const UpdateIndexV2RequestType: RequestType<UpdateIndexV2Request, any, an
 
 export type QueryBM25IndexRequest = string
 
-export type QueryBM25IndexRequestPayload = { query: string }
+export type QueryBM25IndexRequestPayload = {
+    query: string
+    filePath: string
+}
 
 export const QueryBM25IndexRequestType: RequestType<QueryBM25IndexRequest, any, any> = new RequestType(
     'lsp/queryBm25Index'
