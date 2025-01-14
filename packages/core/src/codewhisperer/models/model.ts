@@ -51,7 +51,7 @@ export type UtgStrategy = 'ByName' | 'ByContent'
 
 export type CrossFileStrategy = 'opentabs' | 'codemap' | 'bm25' | 'default'
 
-export type SupplementalContextStrategy = CrossFileStrategy | UtgStrategy | 'Empty'
+export type SupplementalContextStrategy = CrossFileStrategy | UtgStrategy | 'empty'
 
 export type PatchInfo = {
     name: string
