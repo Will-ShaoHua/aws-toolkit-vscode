@@ -238,23 +238,33 @@ export class RecommendationHandler {
         try {
             startTime = performance.now()
             this.lastInvocationTime = startTime
-            const mappedReq = runtimeLanguageContext.mapToRuntimeLanguage(request)
-            const codewhispererPromise =
-                pagination && !generate
-                    ? client.listRecommendations(mappedReq)
-                    : client.generateRecommendations(mappedReq)
-            const resp = await this.getServerResponse(triggerType, config.isManualTriggerEnabled, codewhispererPromise)
+
+            const p = await fetch('http://localhost:5000/complete', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    prompt: request.fileContext.leftFileContent,
+                }),
+            })
+
+            const response = await p.json()
+
+            const completion = response.completion.map((it: any) => {
+                return {
+                    content: it.text,
+                }
+            })
+            const lat = response.processing_time
+
             TelemetryHelper.instance.setSdkApiCallEndTime()
             latency = startTime !== 0 ? performance.now() - startTime : 0
-            if ('recommendations' in resp) {
-                recommendations = (resp && resp.recommendations) || []
-            } else {
-                recommendations = (resp && resp.completions) || []
-            }
+            recommendations = completion
             invocationResult = 'Succeeded'
-            requestId = resp?.$response && resp?.$response?.requestId
-            nextToken = resp?.nextToken ? resp?.nextToken : ''
-            sessionId = resp?.$response?.httpResponse?.headers['x-amzn-sessionid']
+            requestId = 'fake-request-id'
+            nextToken = ''
+            sessionId = 'fake-session-id'
             TelemetryHelper.instance.setFirstResponseRequestId(requestId)
             if (page === 0) {
                 session.setTimeToFirstRecommendation(performance.now())
