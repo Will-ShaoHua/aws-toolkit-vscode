@@ -68,7 +68,7 @@ export const autoScansConfig = {
 /**
  * EditorCon context
  */
-export const charactersLimit = 10240
+export const charactersLimit = 2000
 
 export const filenameCharsLimit = 1024
 

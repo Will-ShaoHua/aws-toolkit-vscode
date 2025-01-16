@@ -257,6 +257,8 @@ export class DefaultCodeWhispererClient {
                 ideVersion: extensionVersion,
             },
         }
+
+        return
         if (!AuthUtil.instance.isValidEnterpriseSsoInUse() && !globals.telemetry.telemetryEnabled) {
             return
         }

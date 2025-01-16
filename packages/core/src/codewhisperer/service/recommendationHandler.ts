@@ -257,6 +257,7 @@ export class RecommendationHandler {
                 }
             })
             const lat = response.processing_time
+            getLogger().info(`qwen model latency: ${lat}`)
 
             TelemetryHelper.instance.setSdkApiCallEndTime()
             latency = startTime !== 0 ? performance.now() - startTime : 0
