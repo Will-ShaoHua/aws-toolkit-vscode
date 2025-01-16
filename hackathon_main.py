@@ -36,7 +36,7 @@ def get_completion():
             return jsonify({'error': 'No prompt provided'}), 400
         
         prompt = data['prompt']
-        max_tokens = data.get('max_tokens', 50)  # Optional parameter with default value
+        max_tokens = data.get('max_tokens', 15)  # Optional parameter with default value
         
         # Get the start time
         start_time = time.time()
