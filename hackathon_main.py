@@ -9,21 +9,24 @@ llm = Llama.from_pretrained(
     filename="Qwen2.5-Coder-0.5B-Q6_K.gguf",
 )
 
+def stop_at_second_newline(text):
+    cleaned_text = text.lstrip("\n")
+    return '\n' in cleaned_text
 
 def complete_code(prompt, max_tokens=50):
     """
     Perform single-line code completion using the GGUF model.
     Stops at the first newline character.
     """
+    
     # Generate text
     response = llm(
-        prompt=prompt,
+        prompt=prompt[:1000],
         max_tokens=max_tokens,
-        # stop=["\n"],  # Stop generation at the first newline
+        stop=stop_at_second_newline,
         temperature=0.7,  # Adjust for creativity
         top_p=0.9  # Use nucleus sampling
     )
-    # Extract and return the completion
     return response["choices"]
 
 
@@ -43,10 +46,12 @@ def get_completion():
         
         # Get the completion
         completion = complete_code(prompt, max_tokens)
-        
+        lastNewLine = completion[0]['text'].rfind('\n')
+        if lastNewLine != -1:
+            completion[0]['text'] = completion[0]['text'][:lastNewLine +1]
         # Calculate processing time
         processing_time = time.time() - start_time
-        
+         
         # Return the result
         return jsonify({
             'completion': completion,
