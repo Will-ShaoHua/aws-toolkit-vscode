@@ -126,7 +126,7 @@ export class DefaultTelemetryService {
     }
 
     public get telemetryEnabled(): boolean {
-        return this._telemetryEnabled
+        return false
     }
     public async setTelemetryEnabled(value: boolean) {
         if (this._telemetryEnabled !== value) {
